@@ -4,7 +4,7 @@
   "description": "A simple color converter realized with CoffeeScript",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "coffee -o javascript/ -cw coffee/"
   },
   "repository": {
     "type": "git",
