@@ -1,5 +1,5 @@
 {
-  "name": "colors",
+  "name": "coffee-colors",
   "version": "1.0.0",
   "description": "A simple color converter realized with CoffeeScript",
   "main": "index.js",
