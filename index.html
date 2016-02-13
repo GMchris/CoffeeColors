@@ -18,10 +18,9 @@
   <script>
     var color= new Color({r: 69, g: 165, b: 245});
     var triad= color.triad();
+    var cmyk = color.to('cmyk');
+    console.log(Color.cmykToRgb(cmyk));
 
-    window.onload= function() {
-
-    };
     document.getElementById('a').style.backgroundColor = color.to('rgb', true);
     document.getElementById('b').style.backgroundColor = triad[0].to('rgb', true);
     document.getElementById('c').style.backgroundColor = triad[1].to('rgb', true);

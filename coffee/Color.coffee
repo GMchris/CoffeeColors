@@ -12,6 +12,8 @@ class window.Color
   @HEX_REGEX: /#(?:[a-f\d]{3}){1,2}\b/
   @RGB_REGEX: /rgb\((?:(?:\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,){2}\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)|\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%(?:\s*,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%){2})\s*\)/
   @HSL_REGEX: /hsl\(\s*0*(?:360|3[0-5]\d|[12]?\d?\d)\s*(?:,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%?\s*){2}\)/
+  @HSV_REGEX: /hsv\(\s*0*(?:360|3[0-5]\d|[12]?\d?\d)\s*(?:,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%?\s*){2}\)/
+  @CMYK_REGEX: /cmyk\((?:\s*(0(\.\d+)?|1(\.0+)?)\s*(?:,?)){4}\)/
   # Determines the format of the given color string.
   # @static
   # @param [string] value
@@ -99,8 +101,8 @@ class window.Color
   @rgbToHsv: (rgb, formatted)->
     {r, g, b}= @formatRgb rgb
 
-    max = max3 r, g, b
-    dif = max - min3 r, g, b
+    max = Math.max r, g, b
+    dif = max - Math.min r, g, b
     s = if max is 0 then 0 else ( 100 * dif / max )
     h = switch
       when s is 0 then 0
@@ -114,7 +116,30 @@ class window.Color
     h = Math.round h
     s = Math.round s
     v = Math.round max * 100 / 255
-    new HSV h, s, v
+    if formatted
+      "hsv(#{h},#{s},#{v})"
+    else
+      new HSV h, s, v
+  # Converts an RGB value to a CMYK value
+  # @static
+  # @param [string|object] rgb
+  # @param formatted
+  @rgbToCmyk: (rgb, formatted)->
+    {r, g, b}= @formatRgb rgb
+
+    r /= 255
+    g /= 255
+    b /= 255
+
+    k= toPrecision (1 - Math.max r, g, b), 2
+    c= toPrecision ((1 - r - k) / (1-k)), 2
+    m= toPrecision ((1 - g - k) / (1-k)), 2
+    y= toPrecision ((1 - b - k) / (1-k)), 2
+
+    if formatted
+      "cmyk(#{c},#{m},#{y},#{k})"
+    else
+      new CMYK c, m, y, k
 
   ######################
   ## Something to RGB ##
@@ -135,6 +160,7 @@ class window.Color
     rgb= hex.match(/.{1,2}/g).map (val)-> parseInt val, 16
 
     getRgb rgb[0], rgb[1], rgb[2], formatted
+
   # Converts an hsl(*, *, *) string to an RGB object.
   # @static
   # @param [RGB] rgb
@@ -149,11 +175,13 @@ class window.Color
         numeric= parseFloat(value)
 
         numeric =  if value.indexOf('%') >= 0 then numeric / 100 else numeric
-    else if isObject hsl
+    else if (isObject hsl) and (hasKeys hsl, ['h', 's', 'l'])
       {h, s, l} = hsl
       h= h / 100
       s= s / 100
       l= l / 100
+    else
+      return
 
     if s == 0
       r = g = b = l
@@ -165,13 +193,13 @@ class window.Color
       b = Color.hueToRgb p, q, h - 1/3
 
     getRgb Math.round(r * 255), Math.round(g * 255), Math.round(b * 255), formatted
+
   # Converts a hue to an RGB value.
   # @static
   # @param [number] p
   # @param [number] q
   # @param [number] t
   #
-
   @hueToRgb: (p, q, t)->
     if (t < 0)
       t += 1
@@ -184,13 +212,26 @@ class window.Color
     if (t < 2/3)
       return p + (q - p) * (2/3 - t) * 6
     p
+
   # Converts an HSV value to an RGB object.
   # @static
   # @param [HSV] hsv
   # @param [boolean] formatted
   #
   @hsvToRgb: (hsv, formatted)->
-    {h, s, v} = hsv
+    if isString hsv
+      unless hsv.match Color.HSV_REGEX
+        return
+
+      [h, s, b]= hsl.match(/hsv\((.+?)\)/)[1].split(',').map (value)->
+        value.trim()
+        numeric= parseFloat(value)
+
+        numeric =  if value.indexOf('%') >= 0 then numeric / 100 else numeric
+    else if (isObject hsv) and (hasKeys hsv, ['h', 's', 'v'])
+      {h, s, v} = hsv
+    else return
+
     if s is 0
       r = g = b = Math.round v * 2.55
     else
@@ -215,6 +256,26 @@ class window.Color
 
     getRgb r, g, b, formatted
 
+  # Converts a CMYK value to a RGB value
+  # @static
+  # @param [string|object] cmyk
+  # @param [boolean] formatted
+  @cmykToRgb: (cmyk, formatted)->
+    if isString cmyk
+      unless cmyk.match @CMYK_REGEX
+        return
+
+      [c, m, y, k]= cmyk.match(/cmyk\((.+?)\)/)[1].split(',').map (value)->
+        value.trim()
+        parseFloat(value)
+    else if (isObject cmyk) and (hasKeys cmyk, ['c', 'm', 'y', 'k'])
+      {c, m, y, k} = cmyk
+
+    r = Math.ceil 255 * (1-c) * (1-k)
+    g = Math.ceil 255 * (1-m) * (1-k)
+    b = Math.ceil 255 * (1-y) * (1-k)
+
+    getRgb r, g, b, formatted
   ####################
   ## Color Palettes ##
   ####################
@@ -233,16 +294,19 @@ class window.Color
       h += 360
 
     new Color Color.hsvToRgb(new HSV(h, s, v))
+
   # Returns the complementary, opposite color of a given color.
   # @static
   # @param [object] color
   @complementary: (color)->
     @angle color, 180
+
   # Returns the two triadic counterparts of a color.
   # @static
   # @param [object] color
   @triad: (color)->
     [@angle(color, 120), @angle(color, -120)]
+
   # Sets the RGB of the object instance.
   # @private
   # @param [string] value
@@ -252,26 +316,33 @@ class window.Color
       when 'hex' then Color.hexToRgb value
       when 'rgb' then Color.formatRgb value
       when 'hsl' then Color.hslToRgb value
+      when 'hsv' then Color.hsvToRgb value
+      when 'cmyk' then Color.cmykToRgb value
       else new RGB 0, 0, 0
 
   constructor: (value= {r: 0, g: 0, b: 0})->
     @_setRgb(value)
+
   # Calls and retrieves the result from an appropriate function.
   # @param [string] property
   #
   to: (property, formatted=false)->
     switch property
-      when 'hex' then return Color.rgbToHex @
-      when 'rgb' then return Color.formatRgb @, formatted
-      when 'hsl' then return Color.rgbToHsl @, formatted
-      when 'hsv' then return Color.rgbToHsv @, formatted
+      when 'hex' then Color.rgbToHex @
+      when 'rgb' then Color.formatRgb @, formatted
+      when 'hsl' then Color.rgbToHsl @, formatted
+      when 'hsv' then Color.rgbToHsv @, formatted
+      when 'cmyk' then Color.rgbToCmyk @, formatted
+
   # Used to change the value of the object, after it's instantiation.
   # @param [object|string] value
   set: (value)->
     @_setRgb(value)
+
   # Finds and returns the object's complementary color
   complementary: ()->
     Color.complementary @
+
   # Finds are returns two colors, based on the object spaced equally on the color wheel.
   triad: ()->
     Color.triad @
@@ -284,15 +355,18 @@ class window.Color
 # The value of these properties is always a number in the [0-255] range.
 class RGB
   constructor: (@r=0, @g=0, @b=0)->
+
 # CMYK has four properties, corresponding to cyan, magenta, yellow and black.
 class CMYK
   constructor: (@c=0, @m=0, @y=0, @k=0)->
+
 # HSL has three properties. Hue, which is an angle between 0 and 360 degrees and
 # corresponds to the official color wheel, saturation which determines the intensity
 # of the color and is a percentage between 0 and 100, and a luminosity which determines
 # the brightness of the color, and is also a percent between 0 and 100.
 class HSL
   constructor: (@h=0, @s=0, @l=0)->
+
 # HSL has three properties. Hue, which is an angle between 0 and 360 degrees and
 # corresponds to the official color wheel, saturation which determines the intensity
 # of the color and is a percentage between 0 and 100, and a value which determines
@@ -309,7 +383,10 @@ class HSV
 # @param [precision] 2
 #
 toPrecision = (number, precision)->
-  parseFloat number.toPrecision(precision)
+  number = parseFloat number.toFixed(precision)
+  if number < 0 then number *= -1
+  number
+
 # Checks if an object has all keys in a given array.
 # @param [object] object
 # @param [array] keys
@@ -319,18 +396,15 @@ hasKeys = (object, keys)->
     if key not of object
       return false
   true
+
 # Determines if a given parameter is a string.
 # @param [Any] item
 #
 isString = (item) ->
   toString.call(item) == '[object String]'
+
 # Determines if a given parameter is an object.
 # @param [Any] item
 #
 isObject = (item) ->
   item != null && typeof item == 'object'
-
-min3= (a,b,c)->
-  if a < b then (if a < c then a else c) else (if b < c then b else c)
-max3= (a,b,c)->
-  if a > b then (if a > c then a else c) else (if b > c then b else c)
