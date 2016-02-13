@@ -1,4 +1,3 @@
-#
 # Color: A global class, which contains static methods for converting different color formats.
 # Instances of the Color class offer a cleaner API for the conversions.
 #
@@ -335,12 +334,3 @@ min3= (a,b,c)->
   if a < b then (if a < c then a else c) else (if b < c then b else c)
 max3= (a,b,c)->
   if a > b then (if a > c then a else c) else (if b > c then b else c)
-
-color= new Color {r: 69, g: 165, b: 245}
-hsv= color.to 'hsv'
-triad= color.triad()
-
-window.onload= ()->
-  document.getElementById('a').style.backgroundColor = color.to('rgb', true)
-  document.getElementById('b').style.backgroundColor = triad[0].to('rgb', true)
-  document.getElementById('c').style.backgroundColor = triad[1].to('rgb', true)

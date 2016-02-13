@@ -3,7 +3,7 @@
 <head lang="en">
   <meta charset="UTF-8">
   <title>Colors</title>
-  <script src="javascript/converter.js"></script>
+  <script src="javascript/Color.js"></script>
   <style>
     .color {
       width: 150px;
@@ -15,5 +15,16 @@
   <div class="color" id="a"></div>
   <div class="color" id="b"></div>
   <div class="color" id="c"></div>
+  <script>
+    var color= new Color({r: 69, g: 165, b: 245});
+    var triad= color.triad();
+
+    window.onload= function() {
+
+    };
+    document.getElementById('a').style.backgroundColor = color.to('rgb', true);
+    document.getElementById('b').style.backgroundColor = triad[0].to('rgb', true);
+    document.getElementById('c').style.backgroundColor = triad[1].to('rgb', true);
+  </script>
 </body>
 </html>
