@@ -10,7 +10,7 @@ class window.Color
   # Regular expressions used to match various color formats.
   #
   @HEX_REGEX: /#(?:[a-f\d]{3}){1,2}\b/
-  @RGB_REGEX: /rgb\((?:(?:\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,){2}\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)|\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%(?:\s*,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%){2})\s*\)/
+  @RGB_REGEX: /rgba?\((?:(?:\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,){2}\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)|\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%(?:\s*,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%){2})\s*\)/
   @HSL_REGEX: /hsl\(\s*0*(?:360|3[0-5]\d|[12]?\d?\d)\s*(?:,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%?\s*){2}\)/
   @HSV_REGEX: /hsv\(\s*0*(?:360|3[0-5]\d|[12]?\d?\d)\s*(?:,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%?\s*){2}\)/
   @CMYK_REGEX: /cmyk\((?:\s*(0(\.\d+)?|1(\.0+)?)\s*(?:,?)){4}\)/
@@ -22,13 +22,18 @@ class window.Color
     if value?
       if isString value
         switch
-          when value.match Color.HSL_REGEX then 'hsl'
           when value.match Color.RGB_REGEX then 'rgb'
           when value.match Color.HEX_REGEX then 'hex'
+          when value.match Color.HSL_REGEX then 'hsl'
+          when value.match Color.HSV_REGEX then 'hsv'
+          when value.match Color.CMYK_REGEX then 'cmyk'
       else if isObject value
         switch
           when hasKeys value, ['r','g','b'] then 'rgb'
           when hasKeys value, ['h','s','l'] then 'hsl'
+          when hasKeys value, ['h','s','v'] then 'hsv'
+          when hasKeys value, ['c','m','y', 'k'] then 'cmyk'
+
   ######################
   ## RGB to something ##
   ######################
@@ -266,8 +271,7 @@ class window.Color
         return
 
       [c, m, y, k]= cmyk.match(/cmyk\((.+?)\)/)[1].split(',').map (value)->
-        value.trim()
-        parseFloat(value)
+        parseFloat(value.trim())
     else if (isObject cmyk) and (hasKeys cmyk, ['c', 'm', 'y', 'k'])
       {c, m, y, k} = cmyk
 
@@ -294,6 +298,7 @@ class window.Color
   # @static
   # @param [object] color
   # @param [number] angle
+  #
   @angle: (color, angle)->
     {h, s, v} = Color.rgbToHsv color
 
@@ -338,7 +343,8 @@ class window.Color
   # @param [object] color
   #
   @splitComplementary: (color)->
-    [@angle(color, 150), @angle(-150)]
+    [@angle(color, 150), @angle(color, -150)]
+
   # Returns an array of a given amount of colors. Which are equally spaced.
   # @static
   # @param [object] color
@@ -357,7 +363,7 @@ class window.Color
   # @param [string] value
   #
   _setRgb: (value)->
-    {@r, @g, @b} = switch Color.getFormat(value)
+    {@r, @g, @b} = switch Color.getFormat value
       when 'hex' then Color.hexToRgb value
       when 'rgb' then Color.formatRgb value
       when 'hsl' then Color.hslToRgb value
@@ -381,8 +387,12 @@ class window.Color
 
   # Used to change the value of the object, after it's instantiation.
   # @param [object|string] value
+  #
   set: (value)->
     @_setRgb(value)
+
+  brightness: ()->
+    toPrecision (Math.max(@r, @g, @b) / 255), 2
 
   angle: (deg)->
     Color.angle @, deg
@@ -390,8 +400,8 @@ class window.Color
   complementary: ()->
     Color.complementary @
 
-  balanced: ()->
-    Color.balanced @
+  balanced: (amount)->
+    Color.balanced @, amount
 
   triad: ()->
     Color.triad @
@@ -468,5 +478,9 @@ isString = (item) ->
 isObject = (item) ->
   item != null && typeof item == 'object'
 
+# Generates a random number between two values.
+# @param [number] min
+# @param [number] max
+#
 randomBetween = (min, max)->
   Math.floor Math.random() * ( max - min + 1) + min

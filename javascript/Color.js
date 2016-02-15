@@ -15,7 +15,7 @@
 
     Color.HEX_REGEX = /#(?:[a-f\d]{3}){1,2}\b/;
 
-    Color.RGB_REGEX = /rgb\((?:(?:\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,){2}\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)|\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%(?:\s*,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%){2})\s*\)/;
+    Color.RGB_REGEX = /rgba?\((?:(?:\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,){2}\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)|\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%(?:\s*,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%){2})\s*\)/;
 
     Color.HSL_REGEX = /hsl\(\s*0*(?:360|3[0-5]\d|[12]?\d?\d)\s*(?:,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%?\s*){2}\)/;
 
@@ -27,12 +27,16 @@
       if (value != null) {
         if (isString(value)) {
           switch (false) {
-            case !value.match(Color.HSL_REGEX):
-              return 'hsl';
             case !value.match(Color.RGB_REGEX):
               return 'rgb';
             case !value.match(Color.HEX_REGEX):
               return 'hex';
+            case !value.match(Color.HSL_REGEX):
+              return 'hsl';
+            case !value.match(Color.HSV_REGEX):
+              return 'hsv';
+            case !value.match(Color.CMYK_REGEX):
+              return 'cmyk';
           }
         } else if (isObject(value)) {
           switch (false) {
@@ -40,6 +44,10 @@
               return 'rgb';
             case !hasKeys(value, ['h', 's', 'l']):
               return 'hsl';
+            case !hasKeys(value, ['h', 's', 'v']):
+              return 'hsv';
+            case !hasKeys(value, ['c', 'm', 'y', 'k']):
+              return 'cmyk';
           }
         }
       }
@@ -292,8 +300,7 @@
           return;
         }
         ref = cmyk.match(/cmyk\((.+?)\)/)[1].split(',').map(function(value) {
-          value.trim();
-          return parseFloat(value);
+          return parseFloat(value.trim());
         }), c = ref[0], m = ref[1], y = ref[2], k = ref[3];
       } else if ((isObject(cmyk)) && (hasKeys(cmyk, ['c', 'm', 'y', 'k']))) {
         c = cmyk.c, m = cmyk.m, y = cmyk.y, k = cmyk.k;
@@ -342,7 +349,7 @@
     };
 
     Color.splitComplementary = function(color) {
-      return [this.angle(color, 150), this.angle(-150)];
+      return [this.angle(color, 150), this.angle(color, -150)];
     };
 
     Color.balanced = function(color, amount) {
@@ -411,6 +418,10 @@
       return this._setRgb(value);
     };
 
+    Color.prototype.brightness = function() {
+      return toPrecision(Math.max(this.r, this.g, this.b) / 255, 2);
+    };
+
     Color.prototype.angle = function(deg) {
       return Color.angle(this, deg);
     };
@@ -419,8 +430,8 @@
       return Color.complementary(this);
     };
 
-    Color.prototype.balanced = function() {
-      return Color.balanced(this);
+    Color.prototype.balanced = function(amount) {
+      return Color.balanced(this, amount);
     };
 
     Color.prototype.triad = function() {

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="javascript/Color.js"></script>
+    <style>
+        .color {
+            width: 150px;
+            height: 150px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<div id="a" class="color"></div>
+<div id="b" class="color"></div>
+<div id="c" class="color"></div>
+<div id="d" class="color"></div>
+<div id="e" class="color"></div>
+<script>
+    (function (){
+        var base= new Color({r: 255, g: 0, b: 105});
+        var colorEls= document.getElementsByClassName('color');
+        var colors = base.balanced(2);
+        colors.unshift(base);
+
+        for (var i=0; i < colors.length; i++) {
+            colorEls[i].style.backgroundColor= colors[i].to('hex');
+        }
+    })();
+</script>
+</body>
+</html>
