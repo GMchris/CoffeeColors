@@ -276,6 +276,16 @@ class window.Color
     b = Math.ceil 255 * (1-y) * (1-k)
 
     getRgb r, g, b, formatted
+  ###########
+  ## Other ##
+  ###########
+
+  # Generates a random color.
+  # @static
+  #
+  @random: ()->
+    new Color {r: randomBetween(0, 255), g: randomBetween(0, 255), b: randomBetween(0, 255)}
+
   ####################
   ## Color Palettes ##
   ####################
@@ -298,14 +308,49 @@ class window.Color
   # Returns the complementary, opposite color of a given color.
   # @static
   # @param [object] color
+  #
   @complementary: (color)->
     @angle color, 180
 
   # Returns the two triadic counterparts of a color.
   # @static
   # @param [object] color
+  #
   @triad: (color)->
-    [@angle(color, 120), @angle(color, -120)]
+    @balanced color, 3
+
+  # Returns the two quadratic counterparts of a color.
+  # @static
+  # @param [object] color
+  #
+  @square: (color)->
+    @balanced color, 4
+
+  # Returns two analogous colors.
+  # @static
+  # @param [object] color
+  #
+  @analogous: (color)->
+    [@angle(color, 30), @angle(color, -30)]
+
+  # Returns to split complementary colors.
+  # @static
+  # @param [object] color
+  #
+  @splitComplementary: (color)->
+    [@angle(color, 150), @angle(-150)]
+  # Returns an array of a given amount of colors. Which are equally spaced.
+  # @static
+  # @param [object] color
+  # @param [number] amount
+  #
+  @balanced: (color, amount = 3)->
+    palette= []
+    angle= 360/ amount
+
+    for cIdx in [1..amount-1]
+      palette.push @angle(color, angle * cIdx)
+    palette
 
   # Sets the RGB of the object instance.
   # @private
@@ -339,13 +384,27 @@ class window.Color
   set: (value)->
     @_setRgb(value)
 
-  # Finds and returns the object's complementary color
+  angle: (deg)->
+    Color.angle @, deg
+
   complementary: ()->
     Color.complementary @
 
-  # Finds are returns two colors, based on the object spaced equally on the color wheel.
+  balanced: ()->
+    Color.balanced @
+
   triad: ()->
     Color.triad @
+
+  square: ()->
+    Color.square @
+
+  analogous: ()->
+    Color.analogous @
+
+  splitComplementary: ()->
+    Color.splitComplementary @
+
 
 ########################
 ## Color constructors ##
@@ -408,3 +467,6 @@ isString = (item) ->
 #
 isObject = (item) ->
   item != null && typeof item == 'object'
+
+randomBetween = (min, max)->
+  Math.floor Math.random() * ( max - min + 1) + min

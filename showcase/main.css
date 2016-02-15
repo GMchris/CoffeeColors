@@ -1,0 +1,126 @@
+body, html {
+	height: 100%;
+	min-height: 100%;
+}
+
+@font-face {
+	font-family: "Comfortaa";
+	src: url(Comfortaa_Regular.ttf);
+}
+
+body {
+	position: relative;
+	padding: 0px;
+	margin: 0px;
+	background-size: 400% 400%;
+	-webkit-animation: background-transition 35s ease infinite;
+	-moz-animation: background-transition 35s ease infinite;
+	-o-animation: background-transition 35s ease infinite;
+	animation: background-transition 35s ease infinite;
+	font-family: "Comfortaa";
+	font-size: 16px;
+	color: #1E1E1E;
+}
+
+code {
+	display: block;
+	background-color: #dbdbdb;
+	padding: 4px;
+	border-left: 3px solid #a6a6a6;
+}
+
+.logo-graphic {
+	display: inline-block;
+	width: 59px;
+	height: 45px;
+	background-image: url('logo.png');
+	vertical-align: middle;
+	filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=0, OffY=1, Color='#444')";
+	-webkit-filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.5));
+	filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.5));
+}
+
+h1 {
+	font-size: 50px;
+	margin: 0;
+	padding-top: 40px;
+	text-shadow: 1px 0px 5px rgba(0,0,0,0.5);
+}
+
+h1 span {
+	vertical-align: middle;
+}
+
+.content {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	position: relative;
+	width: calc(100% - 20px);
+	margin: 35px auto;
+}
+
+.white {
+	color: white;
+}
+
+.flex {
+	display: flex;
+}
+
+.color {
+	flex: 1;
+	box-sizing: border-box;
+	margin: 8px 5px 0px 5px;
+	height: 25px;
+	line-height: 25px;
+	border-radius: 6px;
+	box-shadow: 0px 1px 5px rgba(0,0,0,0.5);
+	text-align: center;
+	color: white;
+	text-shadow: 0px 1px 2px rgba(0,0,0,0.9);
+}
+
+.section {
+	position: relative;
+	display: inline-block;
+	text-align: left;
+	padding: 10px;
+	margin: 5px;
+	background-color: #fafafa;
+	border-radius: 10px;
+	box-shadow: 0px 1px 5px rgba(0,0,0,0.5);
+}
+
+.section.step {
+	width: 400px;
+}
+
+.section.long {
+	width: 475px;
+}
+
+.tcenter {
+	text-align: center;
+}
+
+@-webkit-keyframes background-transition {
+	0%{background-position:0% 91%}
+	50%{background-position:100% 10%}
+	100%{background-position:0% 91%}
+}
+@-moz-keyframes background-transition {
+	0%{background-position:0% 91%}
+	50%{background-position:100% 10%}
+	100%{background-position:0% 91%}
+}
+@-o-keyframes background-transition {
+	0%{background-position:0% 91%}
+	50%{background-position:100% 10%}
+	100%{background-position:0% 91%}
+}
+@keyframes background-transition {
+	0%{background-position:0% 91%}
+	50%{background-position:100% 10%}
+	100%{background-position:0% 91%}
+}
