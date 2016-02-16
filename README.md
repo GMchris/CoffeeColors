@@ -40,6 +40,26 @@ var hex= color.to('hex') // '#45A5F5'
 var rgb= color.to('hsl', true) // 'hsl(0.58,0.9,0.62)'
 ```
 
+Once a color is instantiated, you can check it's brightness:
+
+```javascript
+color.brightness(); //=> 0.92
+```
+
+Get or set it's alpha:
+
+```javascript
+color.alpha(); // => 1
+color.alpha(0.6); // => 0.6
+color.to('rgb', true); // => 'rgba(69, 165, 245, 0.6)'
+```
+
+Or get it's temperature. Temperature means whether the color is cold or warm.
+
+```javascript
+color.temperature(); // => 'cold'
+```
+
 ###Supported
 
 The following formats and ways of declaring and requesting methods exist.
@@ -74,20 +94,23 @@ While it's not wrong to use the static method, especially when you don't want to
 There are a few methods that serve a more artistic purpose. What's unique about them, other than their intended use, is the fact that they're featured both as static methods on the Color constructor, as well as
 methods on Color instances. The currently available ones are:
 
-*angle* - Adds a given amount of degrees to a color. Rotating it's hue on the color wheel. This method is actually used to implement all color theory methods, and heavily relies on the HSV color format.
+*angle(color, deg)* - Adds a given amount of degrees to a color. Rotating it's hue on the color wheel. This method is actually used to implement all color theory methods, and heavily relies on the HSV color format.
 
-*complementary* - Applies the `angle` method, using exactly 180 degrees. Meaning that the exact opposite hue on the color wheel is chosen.
+*analogous(color)* - Returns the analogous or adjacent colors (30deg, -30deg) of a given color.
 
-*triad* - Applies the angle method with once with 120 degrees and again with -120, to get three equally spaced colors on the wheel.
+*complementary(color)* - Applies the `angle` method, using exactly 180 degrees. Meaning that the exact opposite hue on the color wheel is chosen.
+
+*triad(color)* - Applies the `angle` method once with 120 degrees and again with -120, to get three equally spaced colors on the wheel.
+
+*splitComplementary(color)* - Applies the `angle` method once with 150 and again with -150 degrees.
+
+*square(color)* - Applies the `angle` method three times, forming a square with the initial color.
+
+*balanced(color, segments)* - Splits the color wheel into equal segments, and returns an array of all the split point colors.
+
 
 ```javascript
 var color= new Color('#2251a8');
 color.complementary(); // => {r: 168, g: 121, b: 34}
 Color.complementary(color); // => {r: 168, g: 121, b: 34} as well
 ```
-Currently you can only pass RGB objects to these methods, but since Color instances fit that interface, it should be very clean either way.
-
-##Planned features:
-
-1. Opacity
-2. Color pallettes
