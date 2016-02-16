@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>Colors</title>
+  <script src="../javascript/Color.js"></script>
+  <link rel="stylesheet" href="main.css"/>
+</head>
+<body>
+  <h1 class="tcenter white">
+      <span>Coffee</span>
+      <div class="logo-graphic"></div>
+      <span>Colors</span>
+  </h1>
+  <div class="content">
+      <div class="section long tcenter">
+		  <h2>
+              npm install coffee-colors
+          </h2>
+      </div>
+  </div>
+  <div class="content">
+      <div class="section step">
+          <span>Create a color</span>
+          <code>var color= new Color("rgb(0, 159, 255)");</code>
+          <div class="flex">
+            <div id="creation-step" class="color"></div>
+		  </div>
+      </div>
+	  <div class="section step">
+		  <span>Get a value from it</span>
+		  <code>color.to('hex');// => "#009fff"</code>
+		  <div class="flex">
+			  <div id="transform-hex" class="color"></div>
+		  </div>
+	  </div>
+  </div>
+  <div class="content">
+	  <div class="section step">
+		  <span>The supported color formats are rgb, hex, cmyk, hsv and hsl.</span>
+		  <code>
+			  color.to('hsv');//=> {h:203,s:100,v:100}<br/>
+          </code>
+          <span>An optional parameter, which is false by default, allows you to
+          transform the color into a CSS-styled string.</span>
+          <code>
+              color.to('hsv', true)//=> "hsv(203,100,100)";
+          </code>
+	  </div>
+	  <div class="section step">
+		  <span>You can also get colors relative to yours.</span>
+		  <code>
+			  color.complementary()//=> {r:255,g:98,b:0}
+		  </code>
+          <span>And can even be used to generate a color scheme.</span>
+		  <code>
+			  color.triad()//=><br/>
+              [{r:255,g:0,b:157},{r:157,g:255,b:0}]
+		  </code>
+		  <div class="flex">
+			  <div id="complementary" class="color"></div>
+			  <div id="triad-one" class="color"></div>
+			  <div id="triad-two" class="color"></div>
+		  </div>
+	  </div>
+  </div>
+  <script>
+      var backgroundColors= [
+        ['#ffc100', '#ff005a'],
+        ['#a3ff00', '#00d2ff'],
+		['#4c04a6', '#fd1bdd'],
+        ['#ff4719', '#2573f9']
+      ];
+
+	  function paint(id, color) {
+          var el= document.getElementById(id);
+          if (!el) {return;}
+		  el.style.backgroundColor= color;
+          el.innerText = color;
+	  }
+
+      (function () {
+		  var prefixes = ['-o-', '-ms-', '-moz-', '-webkit-', ''];
+          var body= document.getElementsByTagName('body')[0];
+          //var colors= backgroundColors[Math.floor(Math.random() * ((backgroundColors.length-1) + 1))];
+
+		  for (var i = 0; i < prefixes.length; i++)
+		  {
+			  body.style.backgroundImage = prefixes[i] + '' +
+              'linear-gradient(45deg, ' +  Color.random().to('hex') + ',' +  Color.random().to('hex') + ')';
+
+			  if (body.style.backgroundImage) { break; }
+		  }
+	  })();
+
+	  var color= new Color('rgb(0, 159, 255)');
+      var triad= color.triad();
+
+	  paint('creation-step', color.to('rgb', true));
+      paint('transform-hex', color.to('hex'));
+      paint('complementary', color.complementary().to('rgb', true));
+	  paint('triad-one', triad[0].to('rgb', true));
+	  paint('triad-two', triad[1].to('rgb', true));
+
+  </script>
+</body>
+</html>
